@@ -1,0 +1,168 @@
+@startuml "light-house"
+
+' Done
+entity AssetType {
+  *id : INT <<PK>>
+  *name : VARCHAR
+  *created_at : DATETIME
+  *updated_at : DATETIME
+  user_id : INT <<FK>>
+}
+
+' Done
+entity Asset {
+  *id : INT <<PK>>
+  *name : VARCHAR
+  *asset_type_id : INT <<FK>>
+  *created_at : DATETIME
+  *updated_at : DATETIME
+  user_id : INT <<FK>>
+}
+
+' Done
+entity ExpenseType {
+  *id : INT <<PK>>
+  *name : VARCHAR
+  *created_at : DATETIME
+  *updated_at : DATETIME
+  user_id : INT <<FK>>
+}
+
+' Done
+entity Expense {
+  *id : INT <<PK>>
+  *description : VARCHAR
+  *expense_type_id : INT <<FK>>
+  *created_at : DATETIME
+  *updated_at : DATETIME
+  user_id : INT <<FK>>
+}
+
+' Done
+entity ContactType {
+  *id : INT <<PK>>
+  *name : VARCHAR -- 'Customer' or 'Vendor'
+  *created_at : DATETIME
+  *updated_at : DATETIME
+  user_id : INT <<FK>>
+}
+
+' Done
+entity Contact {
+  *id : INT <<PK>>
+  *name : VARCHAR
+  *business_name : VARCHAR
+  *phone : VARCHAR
+  *description : TEXT
+  *contact_type_id : INT <<FK>>
+  *created_at : DATETIME
+  *updated_at : DATETIME
+  -- user_id : INT <<FK>> -- Removed, handled by UserContact
+}
+
+entity TransactionType {
+  *id : INT <<PK>>
+  *name : VARCHAR(50) -- "Income", "Payment", "Transfer"
+  *created_at : DATETIME
+  *updated_at : DATETIME
+}
+
+' Done
+entity Transaction {
+  *id : INT <<PK>>
+  *transaction_type_id : INT <<FK>>
+  *amount : DECIMAL(10,2)
+  *asset_id : INT <<FK>> -- source
+  *destination_asset_id : INT <<FK NULLABLE>> -- destination for transfers
+  *expense_id : INT <<FK NULLABLE>>
+  *contact_id : INT <<FK NULLABLE>>
+  *note : TEXT
+  *created_at : DATETIME
+  *updated_at : DATETIME
+  user_id : INT <<FK>>
+}
+
+' Done
+entity CurrentSheet {
+  *id : INT <<PK>>
+  *asset_id : INT <<FK>>
+  *balance : DECIMAL(10,2)
+  *last_transaction_id : INT <<FK NULLABLE>>
+  *updated_at : DATETIME
+  user_id : INT <<FK>>
+}
+
+' Done
+entity Gender {
+  *id : INT <<PK>>
+  *name : VARCHAR(20) -- "Male", "Female", "Other"
+  *created_at : DATETIME
+  *updated_at : DATETIME
+}
+
+ ' Done
+entity User {
+  *id : INT <<PK>>
+  *username : VARCHAR(50)
+  *password : VARCHAR(255)  -- Store hashed password
+  *email : VARCHAR(100) <<UNIQUE>>
+  *first_name : VARCHAR(50)
+  *last_name : VARCHAR(50)
+  *mcp_token : VARCHAR(255) -- For storing MCP credentials
+  *gender_id : INT <<FK NULLABLE>>
+  *user_role_id : INT <<FK>>
+  *created_at : DATETIME
+  *updated_at : DATETIME
+}
+
+' Done
+entity UserRole {
+  *id : INT <<PK>>
+  *name : VARCHAR(50)
+  *created_at : DATETIME
+  *updated_at : DATETIME
+}
+
+entity UserContact {
+  *user_id : INT <<PK>> <<FK>>
+  *contact_id : INT <<PK>> <<FK>>
+  *created_at : DATETIME
+}
+
+' Relationships
+AssetType ||--o{ Asset : asset_type_id
+ExpenseType ||--o{ Expense : expense_type_id
+ContactType ||--o{ Contact : contact_type_id
+
+' Contact to Transaction (via GeneralTransaction)
+Contact ||--o{ Transaction : contact_id
+
+' Asset to Transaction (source and destination)
+Asset ||--o{ Transaction : asset_id
+Asset ||--o{ Transaction : destination_asset_id
+
+' Expense to Transaction
+Expense ||--o{ Transaction : expense_id
+
+' Asset to CurrentSheet
+Asset ||--o{ CurrentSheet : asset_id
+
+' User to their specific data
+User ||--o{ AssetType : user_id
+User ||--o{ Asset : user_id
+User ||--o{ ExpenseType : user_id
+User ||--o{ Expense : user_id
+User ||--o{ ContactType : user_id
+User ||--o{ UserRole : user_role_id
+' User ||--o{ Contact : user_id -- Replaced by UserContact
+User ||--o{ Transaction : user_id
+User ||--o{ CurrentSheet : user_id
+
+' New Relationships
+TransactionType ||--o{ Transaction : transaction_type_id
+Gender ||--o{ User : gender_id
+User ||--o{ UserContact : user_id
+Contact ||--o{ UserContact : contact_id
+Transaction ||--o{ CurrentSheet : last_transaction_id
+
+@enduml

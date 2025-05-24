@@ -1,7 +1,9 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import PersonIcon from "@mui/icons-material/Person";
 import MenuIcon from "@mui/icons-material/Menu";
+import SavingsIcon from "@mui/icons-material/Savings"; // Import the SavingsIcon
 import { useState, useEffect, useRef } from "react";
+import useTokenStore from "../../store/token_store"; // Import the token store
 
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -10,6 +12,8 @@ const Navbar = () => {
     const [hoveredLink, setHoveredLink] = useState<string | null>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const profileDropdownRef = useRef<HTMLDivElement>(null);
+    const navigate = useNavigate();
+    const clearToken = useTokenStore((state) => state.clearToken);
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
@@ -21,6 +25,11 @@ const Navbar = () => {
 
     const toggleProfileDropdown = () => {
         setIsProfileDropdownOpen(!isProfileDropdownOpen);
+    };
+
+    const handleLogout = () => {
+        clearToken(); // Clear the token from the store
+        navigate("/"); // Redirect to the landing page
     };
 
     // Close dropdowns when clicking outside
@@ -50,7 +59,16 @@ const Navbar = () => {
         <nav className="bg-gray-300 w-full">
             <div className="container mx-auto flex justify-between items-center px-4 py-3">
                 {/* Left Section */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-4">
+                    {/* Logo Section */}
+                    <div className="flex items-center gap-2">
+                        <SavingsIcon className="text-blue-500" fontSize="medium" />
+                        <span className="text-md font-bold text-blue-500">
+                            Light House
+                        </span>
+                    </div>
+
+                    {/* Navigation Links */}
                     <button
                         className="md:hidden text-blue-500 focus:outline-none"
                         onClick={toggleMenu}
@@ -59,7 +77,7 @@ const Navbar = () => {
                     </button>
                     <div className="hidden md:flex gap-2">
                         <NavLink
-                            to="/"
+                            to="/dashboard"
                             end
                             className="rounded-md px-3 py-2 bg-blue-300 hover:bg-blue-400"
                         >
@@ -176,18 +194,12 @@ const Navbar = () => {
                             >
                                 Mcp Token
                             </NavLink>
-                            <NavLink
-                                to="/logout"
-                                className={`block px-4 py-2 ${
-                                    hoveredLink === "Log-out"
-                                        ? "bg-gray-100"
-                                        : "text-gray-700"
-                                } hover:bg-gray-100`}
-                                onMouseEnter={() => setHoveredLink("Log-out")}
-                                onMouseLeave={() => setHoveredLink(null)}
+                            <button
+                                onClick={handleLogout}
+                                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
                             >
                                 Log-out
-                            </NavLink>
+                            </button>
                         </div>
                     )}
                 </div>

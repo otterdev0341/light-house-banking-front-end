@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { ReqSignUpDto } from "../../domain/dto/user_dto";
-
-
+import SavingsIcon from "@mui/icons-material/Savings"; // Import the SavingsIcon
 
 const SignUpPage = () => {
     const [formData, setFormData] = useState<ReqSignUpDto>({
@@ -52,6 +51,13 @@ const SignUpPage = () => {
 
     return (
         <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+            {/* Logo Section */}
+            <div className="flex flex-col items-center mb-6">
+                <SavingsIcon className="text-blue-500" fontSize="large" />
+                <h1 className="text-2xl font-bold text-blue-500">Light House</h1>
+            </div>
+
+            {/* Sign-Up Form */}
             <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
                 <h1 className="text-2xl font-bold mb-6 text-center">Sign Up</h1>
                 <form onSubmit={handleSubmit} className="flex flex-col space-y-4">

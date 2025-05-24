@@ -1,31 +1,20 @@
-import { Typography } from "@mui/material"
+import { useLocation } from "react-router-dom"
 import Navbar from "./ui/components/Navbar"
-
-import ContactPage from "./ui/page/Contact"
-import AssetPage from "./ui/page/Asset"
-import ExpensePage from "./ui/page/Expense"
-import IncomePage from "./ui/page/transaction/Income"
-import PaymentPage from "./ui/page/transaction/Payment"
-import TransferPage from "./ui/page/transaction/Transfer"
-import CurrentSheetPage from "./ui/page/CurrentSheet"
+import RouteRegister from "./routes/RouteRegister"
 
 
 function App() {
-  
+  const location = useLocation()
+
+  // Define routes where the Navbar should be hidden
+  const hideNavbarRoutes = ["/sign-in", "/sign-up"]
+  const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname)
 
   return (
     <>
       <div className='container mx-auto'>
-      <Navbar />
-      {/* <SignInPage />
-      <SignUpPage /> */}
-      {/* <ContactPage />
-      <AssetPage />
-      <ExpensePage /> */}
-      <IncomePage />
-      <PaymentPage />
-      <TransferPage />
-      <CurrentSheetPage />
+        {!shouldHideNavbar && <Navbar />}
+        <RouteRegister />
       </div>
       
     </>
