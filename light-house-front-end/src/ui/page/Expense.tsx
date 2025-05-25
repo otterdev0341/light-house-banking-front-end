@@ -1,50 +1,25 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Tabs, Tab, Box, Button, Dialog, DialogTitle, DialogContent, TextField, DialogActions } from "@mui/material";
 import ExpenseTable from "../data_table/expense_table";
 import ExpenseTypeTable from "../data_table/expense_type_table";
+import useTokenStore from "../../store/token_store";
+import { ExpenseTypeService } from "../../service/expense_type_service";
+import useExpenseTypeStore from "../../store/expense_type_store";
+import { ExpenseService } from "../../service/expense_service";
+import useExpenseStore from "../../store/expense_store";
 
 
-const mockExpenseData = {
-    data: [
-        {
-            id: "1",
-            description: "Office Supplies",
-            expense_type_name: "Operational",
-            created_at: "2023-01-01T10:00:00Z",
-            updated_at: "2023-01-10T15:00:00Z",
-        },
-        {
-            id: "2",
-            description: "Travel Expenses",
-            expense_type_name: "Travel",
-            created_at: "2023-02-01T12:00:00Z",
-            updated_at: "2023-02-05T14:00:00Z",
-        },
-    ],
-};
 
-const mockExpenseTypeData = {
-    data: [
-        {
-            id: "1",
-            name: "Operational",
-            created_at: "2023-01-01T10:00:00Z",
-            updated_at: "2023-01-10T15:00:00Z",
-        },
-        {
-            id: "2",
-            name: "Travel",
-            created_at: "2023-02-01T12:00:00Z",
-            updated_at: "2023-02-05T14:00:00Z",
-        },
-    ],
-};
+
 
 const ExpensePage: React.FC = () => {
     const [tabIndex, setTabIndex] = useState<number>(0);
     const [isExpenseModalOpen, setIsExpenseModalOpen] = useState<boolean>(false);
     const [isExpenseTypeModalOpen, setIsExpenseTypeModalOpen] = useState<boolean>(false);
-
+    const token = useTokenStore((state) => state.token);
+    const expense_type = useExpenseTypeStore((state) => state.expenseTypes);
+    const expense = useExpenseStore((state) => state.expenses);
+    
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabIndex(newValue);
     };
@@ -65,6 +40,57 @@ const ExpensePage: React.FC = () => {
         setIsExpenseTypeModalOpen(false);
     };
 
+    // expense 
+    useEffect(() => {
+        const fetchExpense = async () => {
+            if (token) {
+                try {
+                    const expense_service = ExpenseService.getInstance();
+                    await expense_service.getExpenseList();
+                } catch (error) {
+                    console.error("Error fetching expenses:", error);
+                }
+            }
+        }
+
+        fetchExpense();
+    },[token])
+
+    if (!expense || !expense.data) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full">
+                <h1 className="text-2xl font-bold mb-4">Expense</h1>
+                <p className="text-lg">No expense data available.</p>
+            </div>
+        );
+    }
+
+    // expense type
+    useEffect(() => {
+        const fetchExpenseType = async () => {
+            if (token) {
+                try{
+                    const expense_type_service = ExpenseTypeService.getInstance();
+                    await expense_type_service.getExpenseTypeList();
+                } catch (error) {
+                    console.error("Error fetching expense types:", error);
+                }
+            }
+        }
+
+        fetchExpenseType();
+    }, [token]);
+
+    if (!expense_type || !expense_type.data) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full">
+                <h1 className="text-2xl font-bold mb-4">Expense Type</h1>
+                <p className="text-lg">No expense type data available.</p>
+            </div>
+        );
+    }
+
+
     return (
         <div className="container mx-auto p-4">
             <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
@@ -83,7 +109,7 @@ const ExpensePage: React.FC = () => {
                     </Button>
                 </div>
                 <ExpenseTable
-                    data={mockExpenseData.data}
+                    data={expense.data}
                     onEdit={(expense) => console.log("Edit Expense:", expense)}
                     onDelete={(expenseId) => console.log("Delete Expense:", expenseId)}
                 />
@@ -98,7 +124,7 @@ const ExpensePage: React.FC = () => {
                     </Button>
                 </div>
                 <ExpenseTypeTable
-                    data={mockExpenseTypeData.data}
+                    data={expense_type.data}
                     onEdit={(expenseType) => console.log("Edit Expense Type:", expenseType)}
                     onDelete={(expenseTypeId) => console.log("Delete Expense Type:", expenseTypeId)}
                 />

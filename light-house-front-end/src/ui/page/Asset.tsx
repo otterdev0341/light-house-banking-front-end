@@ -1,49 +1,24 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Tabs, Tab, Box, Button, Dialog, DialogTitle, DialogContent, TextField, DialogActions } from "@mui/material";
 import AssetTable from "../data_table/asset_table";
 import AssetTypeTable from "../data_table/asset_type_table";
+import useTokenStore from "../../store/token_store";
+import useAssetStore from "../../store/asset_store";
+import useAssetTypeStore from "../../store/asset_type_store";
+import { AssetService } from "../../service/asset_service";
+import { AssetTypeService } from "../../service/asset_type_service";
 
 
-const mockAssetData = {
-    data: [
-        {
-            id: "1",
-            name: "Building",
-            asset_type: "Real Estate",
-            created_at: "2023-01-01T10:00:00Z",
-            updated_at: "2023-01-10T15:00:00Z",
-        },
-        {
-            id: "2",
-            name: "Vehicle",
-            asset_type: "Transport",
-            created_at: "2023-02-01T12:00:00Z",
-            updated_at: "2023-02-05T14:00:00Z",
-        },
-    ],
-};
 
-const mockAssetTypeData = {
-    data: [
-        {
-            id: "1",
-            name: "Real Estate",
-            created_at: "2023-01-01T10:00:00Z",
-            updated_at: "2023-01-10T15:00:00Z",
-        },
-        {
-            id: "2",
-            name: "Transport",
-            created_at: "2023-02-01T12:00:00Z",
-            updated_at: "2023-02-05T14:00:00Z",
-        },
-    ],
-};
 
 const AssetPage: React.FC = () => {
     const [tabIndex, setTabIndex] = useState<number>(0);
     const [isAssetModalOpen, setIsAssetModalOpen] = useState<boolean>(false);
     const [isAssetTypeModalOpen, setIsAssetTypeModalOpen] = useState<boolean>(false);
+    const token = useTokenStore((state) => state.token);
+    const asset_store = useAssetStore((state) => state.assets);
+    const asset_type_store = useAssetTypeStore((state) => state.assetTypes);
+
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabIndex(newValue);
@@ -65,6 +40,59 @@ const AssetPage: React.FC = () => {
         setIsAssetTypeModalOpen(false);
     };
 
+    // asset store fetch
+    useEffect(() => {
+        const fetchAssets = async () => {
+            if (token) {
+                try {
+                    // Simulate fetching assets
+                    const asset_service = AssetService.getInstance();
+                    await asset_service.getAssetList();
+                    
+                } catch (error) {
+                    console.error("Error fetching assets:", error);
+                }
+            }
+        };
+
+        fetchAssets();
+    },[token]);
+    if (!asset_store || !asset_store.data) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full">
+                <h1 className="text-2xl font-bold mb-4">Expense Type</h1>
+                <p className="text-lg">No expense type data available.</p>
+            </div>
+        );
+    }
+    // asset type fetch
+    useEffect(() => {
+        const fetchAssetType = async () => {
+            if (token) {
+                try {
+                    // Simulate fetching assets
+                    const asset_type_service = AssetTypeService.getInstance();
+                    await asset_type_service.getAssetTypeList();
+                    
+                } catch (error) {
+                    console.error("Error fetching assets:", error);
+                }
+            }
+        };
+
+        fetchAssetType();
+    },[token]);
+    if (!asset_type_store || !asset_type_store.data) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full">
+                <h1 className="text-2xl font-bold mb-4">Expense Type</h1>
+                <p className="text-lg">No expense type data available.</p>
+            </div>
+        );
+    }
+
+
+
     return (
         <div className="container mx-auto p-4">
             <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
@@ -83,7 +111,7 @@ const AssetPage: React.FC = () => {
                     </Button>
                 </div>
                 <AssetTable
-                    data={mockAssetData.data}
+                    data={asset_store.data}
                     onEdit={(asset) => console.log("Edit Asset:", asset)}
                     onDelete={(assetId) => console.log("Delete Asset:", assetId)}
                 />
@@ -98,7 +126,7 @@ const AssetPage: React.FC = () => {
                     </Button>
                 </div>
                 <AssetTypeTable
-                    data={mockAssetTypeData.data}
+                    data={asset_type_store.data}
                     onEdit={(assetType) => console.log("Edit Asset Type:", assetType)}
                     onDelete={(assetTypeId) => console.log("Delete Asset Type:", assetTypeId)}
                 />

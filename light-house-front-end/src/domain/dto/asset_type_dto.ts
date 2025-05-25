@@ -13,7 +13,7 @@ export interface ReqCreateAssetTypeDto {
     updated_at: string;
   }
   
-  export interface ResListAssestTypeDto {
+  export interface ResListAssetTypeDto {
     length: number;
     data: ResEntryAssetTypeDto[];
   }

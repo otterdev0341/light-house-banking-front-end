@@ -1,7 +1,26 @@
+import React, { useEffect } from "react";
 import useUserStore from "../../store/user_store";
+import useTokenStore from "../../store/token_store";
+import { UserService } from "../../service/user_service";
 
 export const ProfilePage = () => {
     const user = useUserStore((state) => state.user);
+    const token = useTokenStore((state) => state.token);
+
+    useEffect(() => {
+        const fetchUserInfo = async () => {
+            if (token) { // Ensure the token is not null
+                try {
+                    const userService = UserService.getInstance();
+                    await userService.getUserInfo(); // Fetch user info and store it in user_store
+                } catch (error) {
+                    console.error("Error fetching user info:", error);
+                }
+            }
+        };
+
+        fetchUserInfo();
+    }, [token]); // Run this effect whenever the token changes
 
     if (!user) {
         return (

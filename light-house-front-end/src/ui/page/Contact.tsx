@@ -1,56 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Tabs, Tab, Box, Button, Dialog, DialogTitle, DialogContent, TextField, DialogActions } from "@mui/material";
 import ContactTable from "../data_table/Contact_table";
 import ContactTypeTable from "../data_table/Contact_type_table";
+import useTokenStore from "../../store/token_store";
+import useContactStore from "../../store/contact_store";
+import useContactTypeStore from "../../store/contact_type_store";
+import { ContactService } from "../../service/contact_service";
+import { ContactTypeService } from "../../service/contact_type_service";
 
 
-const mockContactData = {
-    data: [
-        {
-            id: "1",
-            name: "John Doe",
-            business_name: "Doe Enterprises",
-            phone: "123-456-7890",
-            description: "A regular customer",
-            contact_type_name: "Customer",
-            created_at: "2023-01-01T10:00:00Z",
-            updated_at: "2023-01-10T15:00:00Z",
-        },
-        {
-            id: "2",
-            name: "Jane Smith",
-            business_name: "Smith & Co.",
-            phone: "987-654-3210",
-            description: "Supplier of office equipment",
-            contact_type_name: "Supplier",
-            created_at: "2023-02-01T12:00:00Z",
-            updated_at: "2023-02-05T14:00:00Z",
-        },
-    ],
-};
-
-const mockContactTypeData = {
-    data: [
-        {
-            id: "1",
-            name: "Customer",
-            created_at: "2023-01-01T10:00:00Z",
-            updated_at: "2023-01-10T15:00:00Z",
-        },
-        {
-            id: "2",
-            name: "Supplier",
-            created_at: "2023-02-01T12:00:00Z",
-            updated_at: "2023-02-05T14:00:00Z",
-        },
-    ],
-};
 
 const ContactPage: React.FC = () => {
     const [tabIndex, setTabIndex] = useState<number>(0);
     const [isContactModalOpen, setIsContactModalOpen] = useState<boolean>(false);
     const [isContactTypeModalOpen, setIsContactTypeModalOpen] = useState<boolean>(false);
-
+    const token = useTokenStore((state) => state.token);
+    const contact = useContactStore((state) => state.contacts);
+    const contact_type = useContactTypeStore((state) => state.contactTypes);
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabIndex(newValue);
     };
@@ -71,6 +37,58 @@ const ContactPage: React.FC = () => {
         setIsContactTypeModalOpen(false);
     };
 
+    // contact
+    useEffect(() => {
+        const fetchContact = async () => {
+            if (token) {
+                try {
+                    
+                    const contact_service = ContactService.getInstance();
+                    await contact_service.getContacts();
+                } catch (error) {
+                    console.error("Error fetching contacts:", error);
+                }
+            }
+        };
+
+        fetchContact();
+    },[token]);
+
+    if (!contact || !contact.data) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full">
+                <h1 className="text-2xl font-bold mb-4">Contact</h1>
+                <p className="text-lg">No contact data available.</p>
+            </div>
+        );
+    }
+
+    // contact type
+    useEffect(() => {
+        const fetchContactType = async () => {
+            if (token) {
+                try {
+                    const contact_type_service = ContactTypeService.getInstance();
+                    await contact_type_service.getContactTypeList();
+                } catch (error) {
+                    console.error("Error fetching contact types:", error);
+                }
+            }
+        };
+
+        fetchContactType();
+    },[token])
+    if (!contact_type || !contact_type.data) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full">
+                <h1 className="text-2xl font-bold mb-4">Contact Type</h1>
+                <p className="text-lg">No contact type data available.</p>
+            </div>
+        );
+    }
+
+
+    // return component
     return (
         <div className="container mx-auto p-4">
             <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
@@ -89,7 +107,7 @@ const ContactPage: React.FC = () => {
                     </Button>
                 </div>
                 <ContactTable
-                    data={mockContactData.data}
+                    data={contact.data}
                     onEdit={(contact) => console.log("Edit Contact:", contact)}
                     onDelete={(contactId) => console.log("Delete Contact:", contactId)}
                 />
@@ -104,7 +122,7 @@ const ContactPage: React.FC = () => {
                     </Button>
                 </div>
                 <ContactTypeTable
-                    data={mockContactTypeData.data}
+                    data={contact_type.data}
                     onEdit={(contactType) => console.log("Edit Contact Type:", contactType)}
                     onDelete={(contactTypeId) => console.log("Delete Contact Type:", contactTypeId)}
                 />
