@@ -15,31 +15,47 @@ const ExpenseTypeTable: React.FC<ExpenseTypeTableProps> = ({ data, onEdit, onDel
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
     const [selectedExpenseType, setSelectedExpenseType] = useState<any>(null);
 
+    // Handle Edit Click
     const handleEditClick = (expenseType: any) => {
         setSelectedExpenseType(expenseType);
         setIsEditModalOpen(true);
     };
 
-    const handleDeleteClick = (expenseType: any) => {
-        setSelectedExpenseType(expenseType);
-        setIsDeleteModalOpen(true);
+    // Handle Save Edit
+    const handleSaveEdit = () => {
+        if (selectedExpenseType) {
+            onEdit({
+                id: selectedExpenseType.id,
+                name: selectedExpenseType.name, // Pass the updated name
+            });
+        }
+        handleCloseEditModal();
     };
 
+    // Handle Close Edit Modal
     const handleCloseEditModal = () => {
         setIsEditModalOpen(false);
         setSelectedExpenseType(null);
     };
 
+    // Handle Delete Click
+    const handleDeleteClick = (expenseType: any) => {
+        setSelectedExpenseType(expenseType);
+        setIsDeleteModalOpen(true);
+    };
+
+    // Handle Confirm Delete
+    const handleConfirmDelete = () => {
+        if (selectedExpenseType) {
+            onDelete(selectedExpenseType.id); // Call the onDelete function with the selected expense type ID
+        }
+        handleCloseDeleteModal();
+    };
+
+    // Handle Close Delete Modal
     const handleCloseDeleteModal = () => {
         setIsDeleteModalOpen(false);
         setSelectedExpenseType(null);
-    };
-
-    const handleConfirmDelete = () => {
-        if (selectedExpenseType) {
-            onDelete(selectedExpenseType.id);
-        }
-        handleCloseDeleteModal();
     };
 
     const expenseTypeColumns: GridColDef[] = [
@@ -80,7 +96,7 @@ const ExpenseTypeTable: React.FC<ExpenseTypeTableProps> = ({ data, onEdit, onDel
 
     return (
         <>
-            <div style={{ height: 400, width: "100%" }}>
+            <div style={{ height: 600, width: "100%" }}>
                 <DataGrid
                     rows={data}
                     columns={expenseTypeColumns}
@@ -89,7 +105,7 @@ const ExpenseTypeTable: React.FC<ExpenseTypeTableProps> = ({ data, onEdit, onDel
                             paginationModel: { pageSize: 5, page: 0 },
                         },
                     }}
-                    pageSizeOptions={[5, 10, 20]}
+                    pageSizeOptions={[10, 20, 30]}
                     checkboxSelection={false}
                     disableRowSelectionOnClick
                 />
@@ -103,20 +119,20 @@ const ExpenseTypeTable: React.FC<ExpenseTypeTableProps> = ({ data, onEdit, onDel
                         label="Name"
                         fullWidth
                         margin="normal"
-                        defaultValue={selectedExpenseType?.name}
+                        value={selectedExpenseType?.name || ""}
+                        onChange={(e) =>
+                            setSelectedExpenseType((prev: any) => ({
+                                ...prev,
+                                name: e.target.value,
+                            }))
+                        }
                     />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseEditModal} color="secondary">
                         Cancel
                     </Button>
-                    <Button
-                        onClick={() => {
-                            onEdit(selectedExpenseType);
-                            handleCloseEditModal();
-                        }}
-                        color="primary"
-                    >
+                    <Button onClick={handleSaveEdit} color="primary">
                         Save
                     </Button>
                 </DialogActions>
@@ -126,7 +142,10 @@ const ExpenseTypeTable: React.FC<ExpenseTypeTableProps> = ({ data, onEdit, onDel
             <Dialog open={isDeleteModalOpen} onClose={handleCloseDeleteModal}>
                 <DialogTitle>Confirm Delete</DialogTitle>
                 <DialogContent>
-                    Are you sure you want to delete <strong>{selectedExpenseType?.name}</strong>?
+                    <p>
+                        Are you sure you want to delete the expense type{" "}
+                        <strong>{selectedExpenseType?.name}</strong>?
+                    </p>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseDeleteModal} color="secondary">

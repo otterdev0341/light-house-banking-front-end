@@ -94,8 +94,8 @@ const AssetPage: React.FC = () => {
 
 
     return (
-        <div className="container mx-auto p-4">
-            <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+        <div className="container mx-auto p-4" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs value={tabIndex} onChange={handleTabChange}>
                     <Tab label="Assets" />
                     <Tab label="Asset Types" />
@@ -103,33 +103,37 @@ const AssetPage: React.FC = () => {
             </Box>
 
             {/* Assets Section */}
-            <Box hidden={tabIndex !== 0} sx={{ mt: 2 }}>
+            <Box hidden={tabIndex !== 0} sx={{ mt: 2, flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold">Assets</h2>
                     <Button variant="contained" color="primary" onClick={handleCreateAsset}>
                         Create New Asset
                     </Button>
                 </div>
-                <AssetTable
-                    data={asset_store.data}
-                    onEdit={(asset) => console.log("Edit Asset:", asset)}
-                    onDelete={(assetId) => console.log("Delete Asset:", assetId)}
-                />
+                <div style={{ flex: 1 }}>
+                    <AssetTable
+                        data={asset_store.data}
+                        onEdit={(asset) => console.log('Edit Asset:', asset)}
+                        onDelete={(assetId) => console.log('Delete Asset:', assetId)}
+                    />
+                </div>
             </Box>
 
             {/* Asset Types Section */}
-            <Box hidden={tabIndex !== 1} sx={{ mt: 2 }}>
+            <Box hidden={tabIndex !== 1} sx={{ mt: 2, flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold">Asset Types</h2>
                     <Button variant="contained" color="primary" onClick={handleCreateAssetType}>
                         Create New Asset Type
                     </Button>
                 </div>
-                <AssetTypeTable
-                    data={asset_type_store.data}
-                    onEdit={(assetType) => console.log("Edit Asset Type:", assetType)}
-                    onDelete={(assetTypeId) => console.log("Delete Asset Type:", assetTypeId)}
-                />
+                <div style={{ flex: 1 }}>
+                    <AssetTypeTable
+                        data={asset_type_store.data}
+                        onEdit={(assetType) => console.log('Edit Asset Type:', assetType)}
+                        onDelete={(assetTypeId) => console.log('Delete Asset Type:', assetTypeId)}
+                    />
+                </div>
             </Box>
 
             {/* Modal for Creating Asset */}
