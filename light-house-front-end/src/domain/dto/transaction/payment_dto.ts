@@ -6,6 +6,7 @@ export interface ReqCreatePaymentDto {
     asset_id: string;
     contact_id: string;
     note: string;
+    created_at: string;
 }
 
 export interface ReqUpdatePaymentDto {
@@ -14,6 +15,7 @@ export interface ReqUpdatePaymentDto {
     asset_id?: string;
     contact_id?: string;
     note?: string;
+    created_at?: string;
 }
 
 export interface ResEntryPaymentDto {

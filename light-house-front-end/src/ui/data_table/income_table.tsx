@@ -1,11 +1,17 @@
 import React, { useState } from "react";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import { Tooltip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from "@mui/material";
+import { Tooltip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Autocomplete } from "@mui/material";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import type { ResListIncomeDto } from "../../store/income_store";
+import dayjs from "dayjs";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import useContactStore from "../../store/contact_store";
+import useAssetStore from "../../store/asset_store";
 
 interface IncomeTableProps {
-    data: any[];
+    data: ResListIncomeDto;
     onEdit: (income: any) => void;
     onDelete: (incomeId: string) => void;
 }
@@ -14,6 +20,8 @@ const IncomeTable: React.FC<IncomeTableProps> = ({ data, onEdit, onDelete }) => 
     const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
     const [selectedIncome, setSelectedIncome] = useState<any>(null);
+    const contact_store = useContactStore.getState();
+    const asset_store = useAssetStore.getState();
 
     const handleEditClick = (income: any) => {
         setSelectedIncome(income);
@@ -40,6 +48,14 @@ const IncomeTable: React.FC<IncomeTableProps> = ({ data, onEdit, onDelete }) => 
             onDelete(selectedIncome.id);
         }
         handleCloseDeleteModal();
+    };
+
+    // Handle changes dynamically for all fields
+    const handleFieldChange = (field: string, value: any) => {
+        setSelectedIncome((prev: any) => ({
+            ...prev,
+            [field]: value,
+        }));
     };
 
     const incomeColumns: GridColDef[] = [
@@ -84,16 +100,16 @@ const IncomeTable: React.FC<IncomeTableProps> = ({ data, onEdit, onDelete }) => 
 
     return (
         <>
-            <div style={{ height: 400, width: "100%" }}>
+            <div style={{ height: 600, width: "100%" }}>
                 <DataGrid
-                    rows={data}
+                    rows={data.data}
                     columns={incomeColumns}
                     initialState={{
                         pagination: {
-                            paginationModel: { pageSize: 5, page: 0 },
+                            paginationModel: { pageSize: 10, page: 0 },
                         },
                     }}
-                    pageSizeOptions={[5, 10, 20]}
+                    pageSizeOptions={[10, 20, 30]}
                     checkboxSelection={false}
                     disableRowSelectionOnClick
                 />
@@ -107,32 +123,65 @@ const IncomeTable: React.FC<IncomeTableProps> = ({ data, onEdit, onDelete }) => 
                         label="Transaction Type"
                         fullWidth
                         margin="normal"
-                        defaultValue={selectedIncome?.transaction_type_name}
+                        value={selectedIncome?.transaction_type_name || ""}
+                        disabled={true} // Assuming transaction type is not editable
                     />
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                            label="Date"
+                            value={dayjs(selectedIncome?.created_at)} // Bind to `selectedIncome.created_at`
+                            onChange={(newValue) => {
+                                if (newValue) {
+                                    handleFieldChange("created_at", newValue.toISOString());
+                                }
+                            }}
+                            slotProps={{ textField: { fullWidth: true, margin: "normal" } }}
+                        />
+                    </LocalizationProvider>
                     <TextField
                         label="Amount"
                         type="number"
                         fullWidth
                         margin="normal"
-                        defaultValue={selectedIncome?.amount}
+                        value={selectedIncome?.amount || ""}
+                        onChange={(e) => handleFieldChange("amount", parseFloat(e.target.value) || 0)}
                     />
-                    <TextField
-                        label="Asset"
-                        fullWidth
-                        margin="normal"
-                        defaultValue={selectedIncome?.asset_name}
+                    <Autocomplete
+                        options={asset_store.assets?.data || []} // Use assets from the store
+                        getOptionLabel={(option) => option.name} // Display the name of the asset
+                        value={
+                            asset_store.assets?.data.find(
+                                (asset) => asset.id === selectedIncome?.asset_id
+                            ) || null
+                        } // Bind to `selectedIncome.asset_id`
+                        onChange={(event, value) =>
+                            handleFieldChange("asset_id", value?.id || "")
+                        } // Update `asset_id`
+                        renderInput={(params) => (
+                            <TextField {...params} label="Asset" fullWidth margin="normal" required />
+                        )}
                     />
-                    <TextField
-                        label="Contact"
-                        fullWidth
-                        margin="normal"
-                        defaultValue={selectedIncome?.contact_name}
+                    <Autocomplete
+                        options={contact_store.contacts?.data || []} // Use contacts from the store
+                        getOptionLabel={(option) => option.name} // Display the name of the contact
+                        value={
+                            contact_store.contacts?.data.find(
+                                (contact) => contact.id === selectedIncome?.contact_id
+                            ) || null
+                        } // Bind to `selectedIncome.contact_id`
+                        onChange={(event, value) =>
+                            handleFieldChange("contact_id", value?.id || "")
+                        } // Update `contact_id`
+                        renderInput={(params) => (
+                            <TextField {...params} label="Contact" fullWidth margin="normal" required />
+                        )}
                     />
                     <TextField
                         label="Note"
                         fullWidth
                         margin="normal"
-                        defaultValue={selectedIncome?.note}
+                        value={selectedIncome?.note || ""}
+                        onChange={(e) => handleFieldChange("note", e.target.value)}
                     />
                 </DialogContent>
                 <DialogActions>
@@ -141,7 +190,7 @@ const IncomeTable: React.FC<IncomeTableProps> = ({ data, onEdit, onDelete }) => 
                     </Button>
                     <Button
                         onClick={() => {
-                            onEdit(selectedIncome);
+                            onEdit(selectedIncome); // Pass the updated income to the parent handler
                             handleCloseEditModal();
                         }}
                         color="primary"

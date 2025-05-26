@@ -67,6 +67,19 @@ export class UrlManagement {
     return this.getBaseUrl() + "/v1/current-sheet";
   }
 
+  static getBaseIncome(): string {
+    return this.getBaseUrl() + "/v1/income";
+  }
+  static getBasePayment(): string {
+    return this.getBaseUrl() + "/v1/payment";
+  }
+  static getBaseTransfer(): string {
+    return this.getBaseUrl() + "/v1/transfer";
+  }
+  static getBaseTransactionType(): string {
+    return this.getBaseUrl() + "/v1/transaction-type";
+  }
+
   static getAssetTypeUrl(crud: BASECRUD, assetTypeId: string): string {
     switch (crud) {
       case "Create":

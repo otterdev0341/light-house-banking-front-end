@@ -4,6 +4,7 @@ export interface ReqCreateIncomeDto {
     asset_id: string;
     contact_id: string;
     note: string;
+    created_at: string;
   }
   
   export interface ReqUpdateIncomeDto {
@@ -11,6 +12,7 @@ export interface ReqCreateIncomeDto {
     asset_id?: string;
     contact_id?: string;
     note?: string;
+    created_at?: string;
   }
   
   export interface ResEntryIncomeDto {

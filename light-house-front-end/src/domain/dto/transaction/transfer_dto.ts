@@ -5,6 +5,7 @@ export interface ReqCreateTransferDto {
     destination_asset_id: string;
     contact_id: string;
     note: string;
+    created_at: string;
   }
   
   export interface ReqUpdateTransferDto {
@@ -13,6 +14,7 @@ export interface ReqCreateTransferDto {
     destination_asset_id?: string;
     contact_id?: string;
     note?: string;
+    created_at?: string;
   }
   
   export interface ResEntryTransferDto {

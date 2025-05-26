@@ -30,4 +30,7 @@ const useContactStore = create<ContactStoreState>()(
     )
 );
 
+// Selector to get only the contact data
+export const useContactData = () => useContactStore((state) => state.contacts);
+
 export default useContactStore;

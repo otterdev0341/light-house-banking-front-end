@@ -4,6 +4,13 @@ import { Tooltip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import useExpenseTypeStore from "../../store/expense_type_store"; // Import the expense_type_store
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 interface ExpenseTableProps {
     data: any[];
@@ -60,8 +67,8 @@ const ExpenseTable: React.FC<ExpenseTableProps> = ({ data, onEdit, onDelete }) =
     const expenseColumns: GridColDef[] = [
         { field: "description", headerName: "Description", flex: 2, headerAlign: "center" },
         { field: "expense_type_name", headerName: "Expense Type", flex: 1, headerAlign: "center" },
-        { field: "created_at", headerName: "Created At", flex: 1, headerAlign: "center" },
-        { field: "updated_at", headerName: "Updated At", flex: 1, headerAlign: "center" },
+        { field: "created_at", headerName: "Created At", flex: 1, headerAlign: "center", valueGetter: (params) => dayjs(params).tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss") },
+        { field: "updated_at", headerName: "Updated At", flex: 1, headerAlign: "center"  },
         {
             field: "actions",
             headerName: "Actions",

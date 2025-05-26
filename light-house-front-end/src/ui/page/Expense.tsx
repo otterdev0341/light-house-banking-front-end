@@ -124,6 +124,7 @@ const ExpensePage: React.FC = () => {
         };
         const expense_type_service = ExpenseTypeService.getInstance();
         const isExist = await expense_type_service.is_exist(req_create_expense_type_dto.name);
+        const expense_service = ExpenseService.getInstance();
         if (isExist) {
             alert("Expense type already exists. Please choose a different name.");
             return; // Exit if the expense type already exists
@@ -142,6 +143,7 @@ const ExpensePage: React.FC = () => {
             setIsExpenseTypeModalOpen(false); // Close the modal
             // Refresh the expense type list
             await expense_type_service.getExpenseTypeList();
+            await expense_service.getExpenseList(); // Refresh the expense list
         }
         catch (error) {
             console.error("Error creating expense type:", error);

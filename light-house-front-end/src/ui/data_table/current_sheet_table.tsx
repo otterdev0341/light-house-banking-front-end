@@ -14,13 +14,13 @@ const CurrentSheetTable: React.FC<CurrentSheetTableProps> = ({ data }) => {
     ];
 
     return (
-        <div style={{ height: 400, width: "100%" }}>
+        <div style={{ height: 600, width: "100%" }}>
             <DataGrid
                 rows={data}
                 columns={currentSheetColumns}
                 initialState={{
                     pagination: {
-                        paginationModel: { pageSize: 5, page: 0 },
+                        paginationModel: { pageSize: 10, page: 0 },
                     },
                 }}
                 pageSizeOptions={[5, 10, 20]}

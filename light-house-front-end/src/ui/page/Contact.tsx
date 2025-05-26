@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Tabs, Tab, Box, Button, Dialog, DialogTitle, DialogContent, TextField, DialogActions } from "@mui/material";
 import ContactTable from "../data_table/Contact_table";
 import ContactTypeTable from "../data_table/Contact_type_table";
@@ -24,9 +24,17 @@ const ContactPage: React.FC = () => {
         description: "",
         contact_type_id: "",
     });
+
     const token = useTokenStore((state) => state.token);
     const contact = useContactStore((state) => state.contacts);
     const contact_type = useContactTypeStore((state) => state.contactTypes);
+
+    // Memoize the contact data to avoid recalculating on every render
+    const memoizedContactData = useMemo(() => contact?.data || [], [contact]);
+
+    // Memoize the contact type data
+    const memoizedContactTypeData = useMemo(() => contact_type?.data || [], [contact_type]);
+
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabIndex(newValue);
     };
@@ -60,7 +68,7 @@ const ContactPage: React.FC = () => {
             console.error("Error updating contact:", error);
         }
     };
-    
+
     const handle_delete_contact = async (contactId: string) => {
         const contact_service = ContactService.getInstance();
         try {
@@ -74,6 +82,7 @@ const ContactPage: React.FC = () => {
 
     const handle_update_contact_type = async (contactTypeId: string, update_dto: ReqUpdateContactTypeDto) => {
         const contact_type_service = ContactTypeService.getInstance();
+        const contact_service = ContactService.getInstance();
         try {
             const response = await contact_type_service.updateContactType(contactTypeId, update_dto);
             if (!response || !response.id) {
@@ -81,6 +90,7 @@ const ContactPage: React.FC = () => {
             }
             console.log("Contact Type Updated:", response);
             await contact_type_service.getContactTypeList(); // Refresh the contact type list
+            await contact_service.getContacts(); // Refresh the contact list
         } catch (error) {
             console.error("Error updating contact type:", error);
         }
@@ -167,15 +177,6 @@ const ContactPage: React.FC = () => {
         fetchContact();
     },[token]);
 
-    if (!contact || !contact.data) {
-        return (
-            <div className="flex flex-col items-center justify-center h-full">
-                <h1 className="text-2xl font-bold mb-4">Contact</h1>
-                <p className="text-lg">No contact data available.</p>
-            </div>
-        );
-    }
-
     // contact type
     useEffect(() => {
         const fetchContactType = async () => {
@@ -191,7 +192,17 @@ const ContactPage: React.FC = () => {
 
         fetchContactType();
     },[token])
-    if (!contact_type || !contact_type.data) {
+
+    if (!memoizedContactData.length) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full">
+                <h1 className="text-2xl font-bold mb-4">Contact</h1>
+                <p className="text-lg">No contact data available.</p>
+            </div>
+        );
+    }
+
+    if (!memoizedContactTypeData.length) {
         return (
             <div className="flex flex-col items-center justify-center h-full">
                 <h1 className="text-2xl font-bold mb-4">Contact Type</h1>
@@ -199,7 +210,6 @@ const ContactPage: React.FC = () => {
             </div>
         );
     }
-
 
     // return component
     return (
@@ -220,7 +230,7 @@ const ContactPage: React.FC = () => {
                     </Button>
                 </div>
                 <ContactTable
-                    data={contact.data}
+                    data={memoizedContactData}
                     onEdit={(updatedContact) =>
                         handle_update_contact(updatedContact.id, {
                             name: updatedContact.name,
@@ -243,7 +253,7 @@ const ContactPage: React.FC = () => {
                     </Button>
                 </div>
                 <ContactTypeTable
-                    data={contact_type.data}
+                    data={memoizedContactTypeData}
                     onEdit={(updatedContactType) =>
                         handle_update_contact_type(updatedContactType.id, {
                             name: updatedContactType.name,
