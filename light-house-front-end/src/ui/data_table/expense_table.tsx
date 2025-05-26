@@ -105,7 +105,7 @@ const ExpenseTable: React.FC<ExpenseTableProps> = ({ data, onEdit, onDelete }) =
                             paginationModel: { pageSize: 5, page: 0 },
                         },
                     }}
-                    pageSizeOptions={[10, 20, 30]}
+                    pageSizeOptions={[10, 20, 30, 40, 50]}
                     checkboxSelection={false}
                     disableRowSelectionOnClick
                 />

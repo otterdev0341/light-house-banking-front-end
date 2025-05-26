@@ -42,6 +42,16 @@ const AssetTypeTable: React.FC<AssetTypeTableProps> = ({ data, onEdit, onDelete 
         handleCloseDeleteModal();
     };
 
+    const handleSaveEdit = () => {
+        if (selectedAssetType) {
+            onEdit({
+                id: selectedAssetType.id,
+                name: selectedAssetType.name,
+            });
+        }
+        handleCloseEditModal();
+    };
+
     const assetTypeColumns: GridColDef[] = [
         { field: "name", headerName: "Name", flex: 1, headerAlign: "center" },
         { field: "created_at", headerName: "Created At", flex: 1, headerAlign: "center" },
@@ -103,20 +113,20 @@ const AssetTypeTable: React.FC<AssetTypeTableProps> = ({ data, onEdit, onDelete 
                         label="Name"
                         fullWidth
                         margin="normal"
-                        defaultValue={selectedAssetType?.name}
+                        value={selectedAssetType?.name || ""}
+                        onChange={(e) =>
+                            setSelectedAssetType((prev: any) => ({
+                                ...prev,
+                                name: e.target.value,
+                            }))
+                        }
                     />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseEditModal} color="secondary">
                         Cancel
                     </Button>
-                    <Button
-                        onClick={() => {
-                            onEdit(selectedAssetType);
-                            handleCloseEditModal();
-                        }}
-                        color="primary"
-                    >
+                    <Button onClick={handleSaveEdit} color="primary">
                         Save
                     </Button>
                 </DialogActions>

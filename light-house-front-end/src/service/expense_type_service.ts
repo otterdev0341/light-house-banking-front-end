@@ -102,8 +102,8 @@ export class ExpenseTypeService {
         return expense_type_store.expenseTypes.data.some((type) => type.name === name);
     } // end is_exist
 
-    public async updateExpenseType(target_asset_type_id: string, expenseType: ReqUpdateAssestTypeDto): Promise<ResEntryExpenseTypeDto> {
-        const base_url = UrlManagement.getBaseExpenseType() + `/${target_asset_type_id}`;
+    public async updateExpenseType(target_expense_type_id: string, expenseType: ReqUpdateAssestTypeDto): Promise<ResEntryExpenseTypeDto> {
+        const base_url = UrlManagement.getBaseExpenseType() + `/${target_expense_type_id}`;
         const user_token = useTokenStore.getState().token;
 
         try {

@@ -7,13 +7,23 @@ import useContactStore from "../../store/contact_store";
 import useContactTypeStore from "../../store/contact_type_store";
 import { ContactService } from "../../service/contact_service";
 import { ContactTypeService } from "../../service/contact_type_service";
-
-
+import type { ReqUpdateContactDto } from "../../domain/dto/contact_dto";
+import type { ReqUpdateContactTypeDto } from "../../domain/dto/contact_type_dto";
+import Autocomplete from "@mui/material/Autocomplete";
+import type { ReqCreateContactDto } from "../../domain/dto/contact_dto";
 
 const ContactPage: React.FC = () => {
     const [tabIndex, setTabIndex] = useState<number>(0);
     const [isContactModalOpen, setIsContactModalOpen] = useState<boolean>(false);
     const [isContactTypeModalOpen, setIsContactTypeModalOpen] = useState<boolean>(false);
+    const [newContactTypeName, setNewContactTypeName] = useState<string>("");
+    const [newContact, setNewContact] = useState<ReqCreateContactDto>({
+        name: "",
+        business_name: "",
+        phone: "",
+        description: "",
+        contact_type_id: "",
+    });
     const token = useTokenStore((state) => state.token);
     const contact = useContactStore((state) => state.contacts);
     const contact_type = useContactTypeStore((state) => state.contactTypes);
@@ -35,6 +45,109 @@ const ContactPage: React.FC = () => {
 
     const handleCloseContactTypeModal = () => {
         setIsContactTypeModalOpen(false);
+    };
+
+    const handle_update_contact = async (contactId: string, update_dto: ReqUpdateContactDto) => {
+        const contact_service = ContactService.getInstance();
+        try {
+            const response = await contact_service.update_contact(contactId, update_dto);
+            if (!response || !response.id) {
+                throw new Error("Failed to update contact. Please try again.");
+            }
+            console.log("Contact Updated:", response);
+            await contact_service.getContacts(); // Refresh the contact list
+        } catch (error) {
+            console.error("Error updating contact:", error);
+        }
+    };
+    
+    const handle_delete_contact = async (contactId: string) => {
+        const contact_service = ContactService.getInstance();
+        try {
+            const response = await contact_service.delete_contact(contactId);
+            console.log("Contact Deleted:", response);
+            await contact_service.getContacts(); // Refresh the contact list
+        } catch (error) {
+            console.error("Error deleting contact:", error);
+        }
+    };
+
+    const handle_update_contact_type = async (contactTypeId: string, update_dto: ReqUpdateContactTypeDto) => {
+        const contact_type_service = ContactTypeService.getInstance();
+        try {
+            const response = await contact_type_service.updateContactType(contactTypeId, update_dto);
+            if (!response || !response.id) {
+                throw new Error("Failed to update contact type. Please try again.");
+            }
+            console.log("Contact Type Updated:", response);
+            await contact_type_service.getContactTypeList(); // Refresh the contact type list
+        } catch (error) {
+            console.error("Error updating contact type:", error);
+        }
+    };
+
+    const handle_delete_contact_type = async (contactTypeId: string) => {
+        const contact_type_service = ContactTypeService.getInstance();
+        try {
+            await contact_type_service.deleteContactType(contactTypeId);
+            console.log("Contact Type Deleted:", contactTypeId);
+            await contact_type_service.getContactTypeList(); // Refresh the contact type list
+        } catch (error) {
+            console.error("Error deleting contact type:", error);
+        }
+    };
+
+    const handle_create_contact_type = async (name: string) => {
+        const contact_type_service = ContactTypeService.getInstance();
+
+        if (!name.trim()) {
+            alert("Contact type name cannot be empty.");
+            return;
+        }
+
+        try {
+            const response = await contact_type_service.create_contact_type({ name });
+            console.log("Contact Type Created:", response);
+
+            // Refresh the contact type list
+            await contact_type_service.getContactTypeList();
+
+            // Close the modal
+            setIsContactTypeModalOpen(false);
+        } catch (error) {
+            console.error("Error creating contact type:", error);
+            alert("An error occurred while creating the contact type. Please try again.");
+        }
+    };
+
+    const handle_create_contact = async (contactDto: ReqCreateContactDto) => {
+        const contact_service = ContactService.getInstance();
+
+        if (!contactDto.name.trim() || !contactDto.contact_type_id) {
+            alert("Name and Contact Type are required.");
+            return;
+        }
+
+        try {
+            const response = await contact_service.createContact(contactDto);
+            console.log("Contact Created:", response);
+
+            // Refresh the contact list
+            await contact_service.getContacts();
+
+            // Clear the input fields (but keep the modal open)
+            setNewContact({
+                name: "",
+                business_name: "",
+                phone: "",
+                description: "",
+                contact_type_id: "",
+            });
+            setIsContactModalOpen(false); // Close the modal after creation
+        } catch (error) {
+            console.error("Error creating contact:", error);
+            alert("An error occurred while creating the contact. Please try again.");
+        }
     };
 
     // contact
@@ -108,8 +221,16 @@ const ContactPage: React.FC = () => {
                 </div>
                 <ContactTable
                     data={contact.data}
-                    onEdit={(contact) => console.log("Edit Contact:", contact)}
-                    onDelete={(contactId) => console.log("Delete Contact:", contactId)}
+                    onEdit={(updatedContact) =>
+                        handle_update_contact(updatedContact.id, {
+                            name: updatedContact.name,
+                            business_name: updatedContact.business_name,
+                            phone: updatedContact.phone,
+                            description: updatedContact.description,
+                            contact_type_id: updatedContact.contact_type_id,
+                        })
+                    }
+                    onDelete={handle_delete_contact}
                 />
             </Box>
 
@@ -123,8 +244,12 @@ const ContactPage: React.FC = () => {
                 </div>
                 <ContactTypeTable
                     data={contact_type.data}
-                    onEdit={(contactType) => console.log("Edit Contact Type:", contactType)}
-                    onDelete={(contactTypeId) => console.log("Delete Contact Type:", contactTypeId)}
+                    onEdit={(updatedContactType) =>
+                        handle_update_contact_type(updatedContactType.id, {
+                            name: updatedContactType.name,
+                        })
+                    }
+                    onDelete={handle_delete_contact_type}
                 />
             </Box>
 
@@ -132,17 +257,78 @@ const ContactPage: React.FC = () => {
             <Dialog open={isContactModalOpen} onClose={handleCloseContactModal}>
                 <DialogTitle>Create New Contact</DialogTitle>
                 <DialogContent>
-                    <TextField label="Name" fullWidth margin="normal" />
-                    <TextField label="Business Name" fullWidth margin="normal" />
-                    <TextField label="Phone" fullWidth margin="normal" />
-                    <TextField label="Description" fullWidth margin="normal" />
-                    <TextField label="Contact Type" fullWidth margin="normal" />
+                    <TextField
+                        label="Name"
+                        fullWidth
+                        margin="normal"
+                        value={newContact.name}
+                        onChange={(e) =>
+                            setNewContact((prev) => ({
+                                ...prev,
+                                name: e.target.value,
+                            }))
+                        }
+                    />
+                    <TextField
+                        label="Business Name"
+                        fullWidth
+                        margin="normal"
+                        value={newContact.business_name}
+                        onChange={(e) =>
+                            setNewContact((prev) => ({
+                                ...prev,
+                                business_name: e.target.value,
+                            }))
+                        }
+                    />
+                    <TextField
+                        label="Phone"
+                        fullWidth
+                        margin="normal"
+                        value={newContact.phone}
+                        onChange={(e) =>
+                            setNewContact((prev) => ({
+                                ...prev,
+                                phone: e.target.value,
+                            }))
+                        }
+                    />
+                    <TextField
+                        label="Description"
+                        fullWidth
+                        margin="normal"
+                        value={newContact.description}
+                        onChange={(e) =>
+                            setNewContact((prev) => ({
+                                ...prev,
+                                description: e.target.value,
+                            }))
+                        }
+                    />
+                    <Autocomplete
+                        options={contact_type?.data || []} // Use contact types from the store
+                        getOptionLabel={(option) => option.name} // Display the name of the contact type
+                        value={
+                            contact_type?.data.find(
+                                (type) => type.id === newContact.contact_type_id
+                            ) || null
+                        } // Set the current value
+                        onChange={(event, value) =>
+                            setNewContact((prev) => ({
+                                ...prev,
+                                contact_type_id: value?.id || "",
+                            }))
+                        }
+                        renderInput={(params) => (
+                            <TextField {...params} label="Contact Type" fullWidth margin="normal" />
+                        )}
+                    />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseContactModal} color="secondary">
                         Cancel
                     </Button>
-                    <Button onClick={() => console.log("Create Contact")} color="primary">
+                    <Button onClick={() => handle_create_contact(newContact)} color="primary">
                         Create
                     </Button>
                 </DialogActions>
@@ -152,13 +338,19 @@ const ContactPage: React.FC = () => {
             <Dialog open={isContactTypeModalOpen} onClose={handleCloseContactTypeModal}>
                 <DialogTitle>Create New Contact Type</DialogTitle>
                 <DialogContent>
-                    <TextField label="Name" fullWidth margin="normal" />
+                    <TextField
+                        label="Name"
+                        fullWidth
+                        margin="normal"
+                        value={newContactTypeName}
+                        onChange={(e) => setNewContactTypeName(e.target.value)}
+                    />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseContactTypeModal} color="secondary">
                         Cancel
                     </Button>
-                    <Button onClick={() => console.log("Create Contact Type")} color="primary">
+                    <Button onClick={() => handle_create_contact_type(newContactTypeName)} color="primary">
                         Create
                     </Button>
                 </DialogActions>
@@ -168,3 +360,4 @@ const ContactPage: React.FC = () => {
 };
 
 export default ContactPage;
+

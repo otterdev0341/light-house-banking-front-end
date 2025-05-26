@@ -20,9 +20,14 @@ const ContactTypeTable: React.FC<ContactTypeTableProps> = ({ data, onEdit, onDel
         setIsEditModalOpen(true);
     };
 
-    const handleDeleteClick = (contactType: any) => {
-        setSelectedContactType(contactType);
-        setIsDeleteModalOpen(true);
+    const handleSaveEdit = () => {
+        if (selectedContactType) {
+            onEdit({
+                id: selectedContactType.id,
+                name: selectedContactType.name, // Pass the updated name
+            });
+        }
+        handleCloseEditModal();
     };
 
     const handleCloseEditModal = () => {
@@ -30,16 +35,21 @@ const ContactTypeTable: React.FC<ContactTypeTableProps> = ({ data, onEdit, onDel
         setSelectedContactType(null);
     };
 
-    const handleCloseDeleteModal = () => {
-        setIsDeleteModalOpen(false);
-        setSelectedContactType(null);
+    const handleDeleteClick = (contactType: any) => {
+        setSelectedContactType(contactType);
+        setIsDeleteModalOpen(true);
     };
 
     const handleConfirmDelete = () => {
         if (selectedContactType) {
-            onDelete(selectedContactType.id);
+            onDelete(selectedContactType.id); // Call the onDelete function with the selected contact type ID
         }
         handleCloseDeleteModal();
+    };
+
+    const handleCloseDeleteModal = () => {
+        setIsDeleteModalOpen(false);
+        setSelectedContactType(null);
     };
 
     const contactTypeColumns: GridColDef[] = [
@@ -80,7 +90,7 @@ const ContactTypeTable: React.FC<ContactTypeTableProps> = ({ data, onEdit, onDel
 
     return (
         <>
-            <div style={{ height: 400, width: "100%" }}>
+            <div style={{ height: 600, width: "100%" }}>
                 <DataGrid
                     rows={data}
                     columns={contactTypeColumns}
@@ -89,7 +99,7 @@ const ContactTypeTable: React.FC<ContactTypeTableProps> = ({ data, onEdit, onDel
                             paginationModel: { pageSize: 5, page: 0 },
                         },
                     }}
-                    pageSizeOptions={[5, 10, 20]}
+                    pageSizeOptions={[10, 20, 30]}
                     checkboxSelection={false}
                     disableRowSelectionOnClick
                 />
@@ -103,20 +113,20 @@ const ContactTypeTable: React.FC<ContactTypeTableProps> = ({ data, onEdit, onDel
                         label="Name"
                         fullWidth
                         margin="normal"
-                        defaultValue={selectedContactType?.name}
+                        value={selectedContactType?.name || ""}
+                        onChange={(e) =>
+                            setSelectedContactType((prev: any) => ({
+                                ...prev,
+                                name: e.target.value,
+                            }))
+                        }
                     />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseEditModal} color="secondary">
                         Cancel
                     </Button>
-                    <Button
-                        onClick={() => {
-                            onEdit(selectedContactType);
-                            handleCloseEditModal();
-                        }}
-                        color="primary"
-                    >
+                    <Button onClick={handleSaveEdit} color="primary">
                         Save
                     </Button>
                 </DialogActions>
@@ -126,7 +136,10 @@ const ContactTypeTable: React.FC<ContactTypeTableProps> = ({ data, onEdit, onDel
             <Dialog open={isDeleteModalOpen} onClose={handleCloseDeleteModal}>
                 <DialogTitle>Confirm Delete</DialogTitle>
                 <DialogContent>
-                    Are you sure you want to delete <strong>{selectedContactType?.name}</strong>?
+                    <p>
+                        Are you sure you want to delete the contact type{" "}
+                        <strong>{selectedContactType?.name}</strong>?
+                    </p>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseDeleteModal} color="secondary">

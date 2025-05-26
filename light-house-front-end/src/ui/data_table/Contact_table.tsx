@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import { Tooltip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from "@mui/material";
+import { Tooltip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Autocomplete } from "@mui/material";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import useContactTypeStore from "../../store/contact_type_store"; // Import the contact_type_store
 
 interface ContactTableProps {
     data: any[];
@@ -14,6 +15,9 @@ const ContactTable: React.FC<ContactTableProps> = ({ data, onEdit, onDelete }) =
     const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
     const [selectedContact, setSelectedContact] = useState<any>(null);
+
+    // Fetch contact types from the store
+    const contactTypes = useContactTypeStore((state) => state.contactTypes?.data || []);
 
     const handleEditClick = (contact: any) => {
         setSelectedContact(contact);
@@ -40,6 +44,20 @@ const ContactTable: React.FC<ContactTableProps> = ({ data, onEdit, onDelete }) =
             onDelete(selectedContact.id);
         }
         handleCloseDeleteModal();
+    };
+
+    const handleSaveEdit = () => {
+        if (selectedContact) {
+            onEdit({
+                id: selectedContact.id,
+                name: selectedContact.name,
+                business_name: selectedContact.business_name,
+                phone: selectedContact.phone,
+                description: selectedContact.description,
+                contact_type_id: selectedContact.contact_type_id,
+            });
+        }
+        handleCloseEditModal();
     };
 
     const contactColumns: GridColDef[] = [
@@ -105,44 +123,73 @@ const ContactTable: React.FC<ContactTableProps> = ({ data, onEdit, onDelete }) =
                         label="Name"
                         fullWidth
                         margin="normal"
-                        defaultValue={selectedContact?.name}
+                        value={selectedContact?.name || ""}
+                        onChange={(e) =>
+                            setSelectedContact((prev: any) => ({
+                                ...prev,
+                                name: e.target.value,
+                            }))
+                        }
                     />
                     <TextField
                         label="Business Name"
                         fullWidth
                         margin="normal"
-                        defaultValue={selectedContact?.business_name}
+                        value={selectedContact?.business_name || ""}
+                        onChange={(e) =>
+                            setSelectedContact((prev: any) => ({
+                                ...prev,
+                                business_name: e.target.value,
+                            }))
+                        }
                     />
                     <TextField
                         label="Phone"
                         fullWidth
                         margin="normal"
-                        defaultValue={selectedContact?.phone}
+                        value={selectedContact?.phone || ""}
+                        onChange={(e) =>
+                            setSelectedContact((prev: any) => ({
+                                ...prev,
+                                phone: e.target.value,
+                            }))
+                        }
                     />
                     <TextField
                         label="Description"
                         fullWidth
                         margin="normal"
-                        defaultValue={selectedContact?.description}
+                        value={selectedContact?.description || ""}
+                        onChange={(e) =>
+                            setSelectedContact((prev: any) => ({
+                                ...prev,
+                                description: e.target.value,
+                            }))
+                        }
                     />
-                    <TextField
-                        label="Contact Type"
-                        fullWidth
-                        margin="normal"
-                        defaultValue={selectedContact?.contact_type_name}
+                    <Autocomplete
+                        options={contactTypes} // Use contact types from the store
+                        getOptionLabel={(option) => option.name} // Display the name of the contact type
+                        value={contactTypes.find(
+                            (type) => type.id === selectedContact?.contact_type_id
+                        ) || null} // Set the current value
+                        onChange={(event, value) =>
+                            setSelectedContact((prev: any) => ({
+                                ...prev,
+                                contact_type_name: value?.name || "",
+                                contact_type_id: value?.id || null, // Store the ID for updates
+                            }))
+                        }
+                        renderInput={(params) => (
+                            <TextField {...params} label="Contact Type" fullWidth margin="normal" />
+                        )}
                     />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseEditModal} color="secondary">
                         Cancel
                     </Button>
-                    <Button
-                        onClick={() => {
-                            onEdit(selectedContact);
-                            handleCloseEditModal();
-                        }}
-                        color="primary"
-                    >
+                    <Button onClick={handleSaveEdit} color="primary">
                         Save
                     </Button>
                 </DialogActions>
