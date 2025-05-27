@@ -1,9 +1,16 @@
 import React, { useState } from "react";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import { Tooltip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from "@mui/material";
+import { Tooltip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Autocomplete } from "@mui/material";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import dayjs from "dayjs";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import useContactStore from "../../store/contact_store";
+import useAssetStore from "../../store/asset_store";
+import useExpenseStore from "../../store/expense_store";
+import useCurrentSheetStore from "../../store/current_sheet_store";
+import { CurrentSheetService } from "../../service/current_sheet_service";
 
 interface PaymentTableProps {
     data: any[];
@@ -15,6 +22,10 @@ const PaymentTable: React.FC<PaymentTableProps> = ({ data, onEdit, onDelete }) =
     const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
     const [selectedPayment, setSelectedPayment] = useState<any>(null);
+    const contact_store = useContactStore((state) => state.contacts);
+    const asset_store = useAssetStore((state) => state.assets);
+    const expense_store = useExpenseStore((state) => state.expenses);
+    const current_sheet_service = CurrentSheetService.getInstance();
 
     const handleEditClick = (payment: any) => {
         setSelectedPayment(payment);
@@ -43,6 +54,13 @@ const PaymentTable: React.FC<PaymentTableProps> = ({ data, onEdit, onDelete }) =
         handleCloseDeleteModal();
     };
 
+    const handleFieldChange = (field: string, value: any) => {
+        setSelectedPayment((prev: any) => ({
+            ...prev,
+            [field]: value,
+        }));
+    };
+
     const paymentColumns: GridColDef[] = [
         { field: "transaction_type_name", headerName: "Transaction Type", flex: 1, headerAlign: "center" },
         { field: "amount", headerName: "Amount", flex: 1, headerAlign: "center" },
@@ -59,23 +77,14 @@ const PaymentTable: React.FC<PaymentTableProps> = ({ data, onEdit, onDelete }) =
             flex: 1,
             headerAlign: "center",
             renderCell: (params) => (
-                <div
-                    className="flex items-center gap-2"
-                    style={{ justifyContent: "center", width: "100%" }}
-                >
+                <div className="flex items-center gap-2" style={{ justifyContent: "center", width: "100%" }}>
                     <Tooltip title="Edit">
-                        <IconButton
-                            onClick={() => handleEditClick(params.row)}
-                            className="text-blue-500 hover:text-blue-700"
-                        >
+                        <IconButton onClick={() => handleEditClick(params.row)} className="text-blue-500 hover:text-blue-700">
                             <ModeEditIcon />
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="Delete">
-                        <IconButton
-                            onClick={() => handleDeleteClick(params.row)}
-                            className="text-red-500 hover:text-red-700"
-                        >
+                        <IconButton onClick={() => handleDeleteClick(params.row)} className="text-red-500 hover:text-red-700">
                             <DeleteIcon />
                         </IconButton>
                     </Tooltip>
@@ -109,38 +118,56 @@ const PaymentTable: React.FC<PaymentTableProps> = ({ data, onEdit, onDelete }) =
                         label="Transaction Type"
                         fullWidth
                         margin="normal"
-                        defaultValue={selectedPayment?.transaction_type_name}
+                        value={selectedPayment?.transaction_type_name || ""}
+                        disabled={true}
                     />
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                            label="Date"
+                            value={dayjs(selectedPayment?.created_at)}
+                            onChange={(newValue) => {
+                                if (newValue) {
+                                    handleFieldChange("created_at", newValue.toISOString());
+                                }
+                            }}
+                            slotProps={{ textField: { fullWidth: true, margin: "normal" } }}
+                        />
+                    </LocalizationProvider>
                     <TextField
                         label="Amount"
                         type="number"
                         fullWidth
                         margin="normal"
-                        defaultValue={selectedPayment?.amount}
+                        value={selectedPayment?.amount || ""}
+                        onChange={(e) => handleFieldChange("amount", parseFloat(e.target.value) || 0)}
                     />
-                    <TextField
-                        label="Expense"
-                        fullWidth
-                        margin="normal"
-                        defaultValue={selectedPayment?.expense_name}
+                    <Autocomplete
+                        options={expense_store?.data || []}
+                        getOptionLabel={(option) => option.description || ""}
+                        value={expense_store?.data?.find((item) => item.id === selectedPayment?.expense_id) || null}
+                        onChange={(event, value) => handleFieldChange("expense_id", value?.id || "")}
+                        renderInput={(params) => <TextField {...params} label="Expense" fullWidth margin="normal" />}
                     />
-                    <TextField
-                        label="Asset"
-                        fullWidth
-                        margin="normal"
-                        defaultValue={selectedPayment?.asset_name}
+                    <Autocomplete
+                        options={asset_store?.data || []}
+                        getOptionLabel={(option) => option.name || ""}
+                        value={asset_store?.data.find((item) => item.id === selectedPayment?.asset_id) || null}
+                        onChange={(event, value) => handleFieldChange("asset_id", value?.id || "")}
+                        renderInput={(params) => <TextField {...params} label="Asset" fullWidth margin="normal" />}
                     />
-                    <TextField
-                        label="Contact"
-                        fullWidth
-                        margin="normal"
-                        defaultValue={selectedPayment?.contact_name}
+                    <Autocomplete
+                        options={contact_store?.data || []}
+                        getOptionLabel={(option) => option.name || ""}
+                        value={contact_store?.data.find((item) => item.id === selectedPayment?.contact_id) || null}
+                        onChange={(event, value) => handleFieldChange("contact_id", value?.id || "")}
+                        renderInput={(params) => <TextField {...params} label="Contact" fullWidth margin="normal" />}
                     />
                     <TextField
                         label="Note"
                         fullWidth
                         margin="normal"
-                        defaultValue={selectedPayment?.note}
+                        value={selectedPayment?.note || ""}
+                        onChange={(e) => handleFieldChange("note", e.target.value)}
                     />
                 </DialogContent>
                 <DialogActions>
@@ -151,6 +178,7 @@ const PaymentTable: React.FC<PaymentTableProps> = ({ data, onEdit, onDelete }) =
                         onClick={() => {
                             onEdit(selectedPayment);
                             handleCloseEditModal();
+                            
                         }}
                         color="primary"
                     >

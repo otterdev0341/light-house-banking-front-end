@@ -149,6 +149,7 @@ const IncomeTable: React.FC<IncomeTableProps> = ({ data, onEdit, onDelete }) => 
                     <Autocomplete
                         options={asset_store.assets?.data || []} // Use assets from the store
                         getOptionLabel={(option) => option.name} // Display the name of the asset
+                        
                         value={
                             asset_store.assets?.data.find(
                                 (asset) => asset.id === selectedIncome?.asset_id

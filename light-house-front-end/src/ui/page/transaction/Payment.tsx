@@ -10,8 +10,9 @@ import Autocomplete from "@mui/material/Autocomplete";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
-import type { ReqCreatePaymentDto } from "../../../domain/dto/transaction/payment_dto";
+import type { ReqCreatePaymentDto, ReqUpdatePaymentDto } from "../../../domain/dto/transaction/payment_dto";
 import { TransactionTypeService } from "../../../service/transaction/transaction_type_service";
+import { CurrentSheetService } from "../../../service/current_sheet_service";
 
 
 
@@ -24,6 +25,8 @@ const PaymentPage: React.FC = () => {
     const contact_store = useContactStore((state) => state.contacts);
     const expense_store = useExpenseStore((state) => state.expenses);
     const asset_store = useAssetStore((state) => state.assets);
+    const current_sheet_service = CurrentSheetService.getInstance();
+
     const [newPayment, setNewPayment] = useState<ReqCreatePaymentDto>({
         transaction_type_id: "",
         amount: 0,
@@ -65,10 +68,10 @@ const PaymentPage: React.FC = () => {
 
     const handle_create_payment = async () => {
         const payment_service = PaymentService.getInstance();
-        const transaction_typ_service = TransactionTypeService.getInstance();
+        const transaction_type_service = TransactionTypeService.getInstance();
         try {
             // Fetch the transaction type ID for "Payment"
-            const payment_trans_id = await transaction_typ_service.getTransactionTypeId("Payment");
+            const payment_trans_id = await transaction_type_service.getTransactionTypeId("Payment");
             if (!payment_trans_id) {
                 throw new Error("Failed to fetch transaction type ID for Income.");
             }
@@ -100,6 +103,46 @@ const PaymentPage: React.FC = () => {
         }
     }
 
+
+    const handle_update_payment = async (update_dto: ReqUpdatePaymentDto & { id: string }) => {
+        const payment_service = PaymentService.getInstance();
+
+        try {
+            // Call the service to update the payment
+            const result = await payment_service.updatePayment(update_dto.id, {
+                amount: update_dto.amount,
+                asset_id: update_dto.asset_id,
+                expense_id: update_dto.expense_id,
+                contact_id: update_dto.contact_id,
+                note: update_dto.note,
+                created_at: update_dto.created_at,
+            });
+            await current_sheet_service.getCurrentSheet();
+            if (result.id) {
+                console.log("Payment updated successfully:", result);
+
+                // Refresh the payment list after the update
+                await payment_service.getPaymentList();
+            }
+        } catch (error) {
+            console.error("Failed to update payment:", error);
+        }
+    };
+
+    const handle_delete_payment = async (paymentId: string) => {
+        const payment_service = PaymentService.getInstance();
+
+        try {
+            // Call the service to delete the payment
+            await payment_service.deletePayment(paymentId);
+            console.log("Payment deleted successfully:", paymentId);
+
+            // Refresh the payment list after deletion
+            await payment_service.getPaymentList();
+        } catch (error) {
+            console.error("Failed to delete payment:", error);
+        }
+    }
 
     // fetch on mount
     useEffect(() => {
@@ -134,9 +177,9 @@ const PaymentPage: React.FC = () => {
                     </Button>
                 </div>
                 <PaymentTable
-                    data={payment_store?.data || []}
-                    onEdit={(payment) => console.log("Edit Payment:", payment)}
-                    onDelete={(paymentId) => console.log("Delete Payment:", paymentId)}
+                    data={payment_store?.data || []} // Pass the payment data from the store
+                    onEdit={(payment) => handle_update_payment(payment)} // Pass the update handler
+                    onDelete={(paymentId) => handle_delete_payment(paymentId)} // Pass the delete handler
                 />
             </Box>
 
