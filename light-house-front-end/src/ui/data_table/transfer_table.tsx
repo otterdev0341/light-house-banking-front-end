@@ -3,6 +3,7 @@ import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { Tooltip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from "@mui/material";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import dayjs from "dayjs";
 
 interface TransferTableProps {
     data: any[];
@@ -49,8 +50,8 @@ const TransferTable: React.FC<TransferTableProps> = ({ data, onEdit, onDelete })
         { field: "destination_asset_name", headerName: "Destination Asset", flex: 1, headerAlign: "center" },
         { field: "contact_name", headerName: "Contact", flex: 1, headerAlign: "center" },
         { field: "note", headerName: "Note", flex: 2, headerAlign: "center" },
-        { field: "created_at", headerName: "Created At", flex: 1, headerAlign: "center" },
-        { field: "updated_at", headerName: "Updated At", flex: 1, headerAlign: "center" },
+        { field: "created_at", headerName: "Created At", flex: 1, headerAlign: "center", valueGetter: (params) => dayjs(params).tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss") },
+        { field: "updated_at", headerName: "Updated At", flex: 1, headerAlign: "center", valueGetter: (params) => dayjs(params).tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss") },
         {
             field: "actions",
             headerName: "Actions",

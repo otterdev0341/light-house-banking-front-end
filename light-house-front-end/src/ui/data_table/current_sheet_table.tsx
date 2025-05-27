@@ -1,5 +1,6 @@
 import React from "react";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
+import dayjs from "dayjs";
 
 interface CurrentSheetTableProps {
     data: any[];
@@ -10,7 +11,7 @@ const CurrentSheetTable: React.FC<CurrentSheetTableProps> = ({ data }) => {
         { field: "asset_name", headerName: "Asset Name", flex: 1, headerAlign: "center" },
         { field: "balance", headerName: "Balance", flex: 1, headerAlign: "center", type: "number" },
         { field: "last_transaction_id", headerName: "Last Transaction ID", flex: 1, headerAlign: "center" },
-        { field: "updated_at", headerName: "Last Updated", flex: 1, headerAlign: "center" },
+        { field: "updated_at", headerName: "Last Updated", flex: 1, headerAlign: "center", valueGetter: (params) => dayjs(params).tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss") },
     ];
 
     return (

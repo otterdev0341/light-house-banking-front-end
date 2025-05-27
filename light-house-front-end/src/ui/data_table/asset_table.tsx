@@ -14,6 +14,7 @@ import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Autocomplete } from "@mui/material";
 import useAssetTypeStore from "../../store/asset_type_store";
+import dayjs from "dayjs";
 
 interface AssetTableProps {
   data: any[];
@@ -73,8 +74,8 @@ const AssetTable: React.FC<AssetTableProps> = ({ data, onEdit, onDelete }) => {
       flex: 1,
       headerAlign: "center",
     },
-    { field: "created_at", headerName: "Created At", flex: 1, headerAlign: "center" },
-    { field: "updated_at", headerName: "Updated At", flex: 1, headerAlign: "center" },
+    { field: "created_at", headerName: "Created At", flex: 1, headerAlign: "center", valueGetter: (params) => dayjs(params).tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss") },
+    { field: "updated_at", headerName: "Updated At", flex: 1, headerAlign: "center", valueGetter: (params) => dayjs(params).tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss") },
     {
       field: "actions",
       headerName: "Actions",

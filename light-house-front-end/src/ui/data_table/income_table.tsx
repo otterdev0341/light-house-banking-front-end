@@ -64,8 +64,8 @@ const IncomeTable: React.FC<IncomeTableProps> = ({ data, onEdit, onDelete }) => 
         { field: "asset_name", headerName: "Asset", flex: 1, headerAlign: "center" },
         { field: "contact_name", headerName: "Contact", flex: 1, headerAlign: "center" },
         { field: "note", headerName: "Note", flex: 2, headerAlign: "center" },
-        { field: "created_at", headerName: "Created At", flex: 1, headerAlign: "center" },
-        { field: "updated_at", headerName: "Updated At", flex: 1, headerAlign: "center" },
+        { field: "created_at", headerName: "Created At", flex: 1, headerAlign: "center", valueGetter: (params) => dayjs(params).tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss") },
+        { field: "updated_at", headerName: "Updated At", flex: 1, headerAlign: "center", valueGetter: (params) => dayjs(params).tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss") },
         {
             field: "actions",
             headerName: "Actions",

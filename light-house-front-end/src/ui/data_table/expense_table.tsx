@@ -68,7 +68,7 @@ const ExpenseTable: React.FC<ExpenseTableProps> = ({ data, onEdit, onDelete }) =
         { field: "description", headerName: "Description", flex: 2, headerAlign: "center" },
         { field: "expense_type_name", headerName: "Expense Type", flex: 1, headerAlign: "center" },
         { field: "created_at", headerName: "Created At", flex: 1, headerAlign: "center", valueGetter: (params) => dayjs(params).tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss") },
-        { field: "updated_at", headerName: "Updated At", flex: 1, headerAlign: "center"  },
+        { field: "updated_at", headerName: "Updated At", flex: 1, headerAlign: "center", valueGetter: (params) => dayjs(params).tz("Asia/Bangkok").format("YYYY-MM-DD HH:mm:ss")  },
         {
             field: "actions",
             headerName: "Actions",
