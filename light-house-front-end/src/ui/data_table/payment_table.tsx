@@ -92,7 +92,7 @@ const PaymentTable: React.FC<PaymentTableProps> = ({ data, onEdit, onDelete }) =
                     columns={paymentColumns}
                     initialState={{
                         pagination: {
-                            paginationModel: { pageSize: 5, page: 0 },
+                            paginationModel: { pageSize: 10, page: 0 },
                         },
                     }}
                     pageSizeOptions={[5, 10, 20]}

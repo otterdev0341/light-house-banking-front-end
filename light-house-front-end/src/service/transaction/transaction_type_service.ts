@@ -4,7 +4,7 @@ import useTransactionTypeStore, { type ResListTransactionTypeDto } from "../../s
 import { UrlManagement } from "../../utility/url_management";
 
 
-type SelectTransactionType = "Income" | "Expense" | "Transfer";
+type SelectTransactionType = "Income" | "Payment" | "Transfer";
 
 
 export class TransactionTypeService {
@@ -71,8 +71,8 @@ export class TransactionTypeService {
             case "Income":
                 result_id = transactionTypes.find((type) => type.name.toLowerCase() === "income")?.id;
                 break;
-            case "Expense":
-                result_id = transactionTypes.find((type) => type.name.toLowerCase() === "expense")?.id;
+            case "Payment":
+                result_id = transactionTypes.find((type) => type.name.toLowerCase() === "payment")?.id;
                 break;
             case "Transfer":
                 result_id = transactionTypes.find((type) => type.name.toLowerCase() === "transfer")?.id;

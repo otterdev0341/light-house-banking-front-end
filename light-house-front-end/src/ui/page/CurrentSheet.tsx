@@ -25,6 +25,8 @@ const CurrentSheetPage: React.FC = () => {
         fetchCurrentSheet();
     }, [token]); // Run this effect whenever the token changes
 
+    console.log("Data retrieved from store:", currentSheet);
+
     if (!currentSheet || !currentSheet.data) {
         return (
             <div className="flex flex-col items-center justify-center h-full">

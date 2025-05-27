@@ -2,8 +2,6 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { ResListCurrentSheetDto } from "../domain/dto/current_sheet_dto";
 
-
-
 interface CurrentSheetStoreState {
     currentSheet: ResListCurrentSheetDto | null;
     setCurrentSheet: (sheet: ResListCurrentSheetDto) => void;
@@ -14,7 +12,17 @@ const useCurrentSheetStore = create<CurrentSheetStoreState>()(
     persist(
         (set) => ({
             currentSheet: null,
-            setCurrentSheet: (sheet: ResListCurrentSheetDto) => set(() => ({ currentSheet: sheet })),
+            setCurrentSheet: (sheet: ResListCurrentSheetDto) => {
+                const transformedSheet = {
+                    ...sheet,
+                    data: sheet.data.map((item) => ({
+                        ...item,
+                        balance: item.balance, // Ensure `balance` is a number
+                    })),
+                };
+                console.log("Transformed data being set in store:", transformedSheet); // Debug transformed data
+                set(() => ({ currentSheet: transformedSheet }));
+            },
             clearCurrentSheet: () => set(() => ({ currentSheet: null })),
         }),
         {
