@@ -9,6 +9,8 @@ import { ExpenseService } from "../../service/expense_service";
 import useExpenseStore from "../../store/expense_store";
 import type { ReqCreateExpenseTypeDto } from "../../domain/dto/expense_type_dto";
 import type { ReqCreateExpenseDto, ReqUpdateExpenseDto } from "../../domain/dto/expense_dto";
+import { useSnackbar } from "../components/notification/snackbar";
+
 
 
 
@@ -23,7 +25,7 @@ const ExpensePage: React.FC = () => {
     const token = useTokenStore((state) => state.token);
     const expense_type = useExpenseTypeStore((state) => state.expenseTypes);
     const expense = useExpenseStore((state) => state.expenses);
-    
+    const { showSnackbar } = useSnackbar();
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabIndex(newValue);
     };
@@ -103,11 +105,12 @@ const ExpensePage: React.FC = () => {
         const expense_service = ExpenseService.getInstance();
         try {
             const response = await expense_service.delete_expense(expenseId);
-
+            
             // Log the response or update the UI accordingly
             console.log("Expense Deleted:", response);
             // Optionally, you can refresh the expense list here
             await expense_service.getExpenseList();
+            
         }
         catch (error) {
             console.error("Error deleting expense:", error);
@@ -175,7 +178,7 @@ const ExpensePage: React.FC = () => {
         const expense_type_service = ExpenseTypeService.getInstance();
         try {
             const response = await expense_type_service.deleteExpenseType(expenseTypeId);
-            
+            showSnackbar("Expense Type Deleted Successfully", "success");
             
             // Log the response or update the UI accordingly
             console.log("Expense Type Deleted:", response);

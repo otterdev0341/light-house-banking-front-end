@@ -6,11 +6,14 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App.tsx'
+import { SnackbarProvider } from './ui/components/notification/snackbar.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+    <SnackbarProvider>
+        <App />
+      </SnackbarProvider>
     </BrowserRouter>
   </StrictMode>,
 )
