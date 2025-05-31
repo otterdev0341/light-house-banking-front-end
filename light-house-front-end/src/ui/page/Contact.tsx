@@ -193,23 +193,7 @@ const ContactPage: React.FC = () => {
         fetchContactType();
     },[token])
 
-    if (!memoizedContactData.length) {
-        return (
-            <div className="flex flex-col items-center justify-center h-full">
-                <h1 className="text-2xl font-bold mb-4">Contact</h1>
-                <p className="text-lg">No contact data available.</p>
-            </div>
-        );
-    }
-
-    if (!memoizedContactTypeData.length) {
-        return (
-            <div className="flex flex-col items-center justify-center h-full">
-                <h1 className="text-2xl font-bold mb-4">Contact Type</h1>
-                <p className="text-lg">No contact type data available.</p>
-            </div>
-        );
-    }
+    
 
     // return component
     return (

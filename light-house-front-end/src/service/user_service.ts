@@ -48,4 +48,33 @@ export class UserService {
       throw error; // Re-throw the error for further handling   
     }
     }// end getUserInfo
+
+    public async getMcpToken(): Promise<string>{
+        const base_url = UrlManagement.getAuthUrl("McpToken");
+        const user_token = useTokenStore.getState().token;
+        try {
+            const response = await fetch(base_url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user_token}`, // Assuming you have a token store
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error fetching Mcp token: ${response.statusText}`);
+            } else if (response.status === 400) {
+                throw new Error("Unauthorized access. Please log in again.");
+            }
+
+            const data = await response.json();
+            const mcp_token = (data.data.mcp_token as string);
+            return mcp_token; // Assuming the token is in the 'data' field of the response
+
+        } catch (error) {
+            console.error("Error fetching Mcp token:", error);
+            throw error; // Re-throw the error for further handling
+        }
+    }
+
 }// end class

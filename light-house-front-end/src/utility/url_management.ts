@@ -1,4 +1,4 @@
-export type AUTH = "SignIn" | "SignUp" | "Me";
+export type AUTH = "SignIn" | "SignUp" | "Me"| "McpToken";
 export type BASECRUD = "Create" | "GetById" | "GetAll" | "Update" | "Delete";
 
 export class UrlManagement {
@@ -14,6 +14,8 @@ export class UrlManagement {
         return this.getBaseUrl() + "/v1/sign-up";
       case "Me":
         return this.getBaseUrl() + "/v1/me";
+      case "McpToken":
+        return this.getBaseUrl() + "/v1/mcp";
       default:
         throw new Error("Invalid AUTH value");
     }

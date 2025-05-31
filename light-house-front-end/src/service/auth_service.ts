@@ -1,5 +1,15 @@
 import type { ReqSignInDto, ReqSignUpDto, ResMeDto, ResSignInDto } from "../domain/dto/user_dto";
+import useAssetStore from "../store/asset_store";
+import useAssetTypeStore from "../store/asset_type_store";
+import useContactStore from "../store/contact_store";
+import useContactTypeStore from "../store/contact_type_store";
+import useCurrentSheetStore from "../store/current_sheet_store";
+import useExpenseStore from "../store/expense_store";
+import useExpenseTypeStore from "../store/expense_type_store";
+import useIncomeStore from "../store/income_store";
+import usePaymentStore from "../store/payment_store";
 import useTokenStore from "../store/token_store";
+import useTransferStore from "../store/transfer_store";
 import useUserStore from "../store/user_store";
 import { UrlManagement } from "../utility/url_management";
 import { UserService } from "./user_service";
@@ -69,7 +79,30 @@ class AuthService {
     public async logout(): Promise<void> {
         // inject token store
         const tokenStore = useTokenStore.getState();
+        const userStore = useUserStore.getState();
+        const contact_store = useContactStore.getState();
+        const contact_type_store = useContactTypeStore.getState();
+        const expnese_store = useExpenseStore.getState();
+        const expense_type_store = useExpenseTypeStore.getState();
+        const asset_store = useAssetStore.getState();
+        const asset_type_store = useAssetTypeStore.getState();
+        const income_store = useIncomeStore.getState();
+        const payment_store = usePaymentStore.getState();
+        const transfer_store = useTransferStore.getState();
+        const current_store = useCurrentSheetStore.getState();
+        // Perform logout logic here
         tokenStore.clearToken(); // Clear the token from the store
+        userStore.clearUser(); // Clear the user from the store
+        contact_store.clearContacts(); // Clear contacts
+        contact_type_store.clearContactTypes(); // Clear contact types
+        expnese_store.clearExpenses(); // Clear expenses
+        expense_type_store.clearExpenseTypes(); // Clear expense types
+        asset_store.clearAssets(); // Clear assets
+        asset_type_store.clearAssetTypes(); // Clear asset types
+        income_store.clearIncomes(); // Clear incomes
+        payment_store.clearPayments(); // Clear payments
+        transfer_store.clearTransfers(); // Clear transfers
+        current_store.clearCurrentSheet(); // Clear current sheet
         console.log('User logged out successfully');
     }
     

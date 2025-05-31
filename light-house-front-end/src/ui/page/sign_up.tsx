@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { ReqSignUpDto } from "../../domain/dto/user_dto";
 import SavingsIcon from "@mui/icons-material/Savings"; // Import the SavingsIcon
+import AuthService from "../../service/auth_service";
 
 const SignUpPage = () => {
+
     const [formData, setFormData] = useState<ReqSignUpDto>({
         username: "",
         password: "",
@@ -20,9 +22,9 @@ const SignUpPage = () => {
         setFormData({ ...formData, [name]: value });
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
+        const auth_service = AuthService.getInstance();
         // Validation logic
         if (formData.username.length < 6) {
             alert("Username must be at least 6 characters long.");
@@ -44,7 +46,13 @@ const SignUpPage = () => {
             alert("Gender must be at least 3 characters long.");
             return;
         }
-
+        const result = await auth_service.register(formData);
+        if (result) {
+            alert("Registration successful! Redirecting to sign-in page.");
+            navigate("/sign-in");
+        } else {
+            alert("Registration failed. Please try again.");
+        }
         console.log("Form submitted:", formData);
         // Add your API call logic here
     };

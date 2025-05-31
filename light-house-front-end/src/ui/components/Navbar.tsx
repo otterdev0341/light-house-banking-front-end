@@ -183,7 +183,7 @@ const Navbar = () => {
                                 Profile
                             </NavLink>
                             <NavLink
-                                to="/mcp-token"
+                                to="/mcp"
                                 className={`block px-4 py-2 ${
                                     hoveredLink === "Mcp Token"
                                         ? "bg-gray-100"

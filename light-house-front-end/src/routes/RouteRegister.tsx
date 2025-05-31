@@ -15,6 +15,7 @@ import ExpensePage from "../ui/page/Expense";
 import CurrentSheetPage from "../ui/page/CurrentSheet";
 import LandingPage from "../ui/page/LandingPage";
 import { ProfilePage } from "../ui/page/Profile";
+import { McpPage } from "../ui/page/Mcp";
 
 function RouteRegister(): React.ReactElement {
   return (
@@ -37,6 +38,8 @@ function RouteRegister(): React.ReactElement {
         <Route path="expense" element={<ExpensePage />} />
         <Route path="current-sheet" element={<CurrentSheetPage />} />
         <Route path="profile" element={<ProfilePage />} />
+        <Route path="mcp" element={<McpPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
   );
